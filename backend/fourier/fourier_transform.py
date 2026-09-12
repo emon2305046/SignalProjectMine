@@ -138,8 +138,9 @@ class FourierTransform:
     def high_boost(self, cutoff, boost_factor=1.5, order=2, brush=None):
         if float(boost_factor) <= 0:
             raise ValueError("boost factor must be greater than zero")
-        high_frequency = self._raw_filter("butterworth", cutoff, order, True, brush)
-        boosted = self.image + float(boost_factor) * high_frequency
+        smoothed = self._raw_filter("gaussian", cutoff, order, False, brush)
+        detail = self.image - smoothed
+        boosted = self.image + float(boost_factor) * detail
         return self._to_uint8(boosted)
 
     def spectrum_image(self):

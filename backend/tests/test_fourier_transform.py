@@ -29,6 +29,20 @@ def test_filter_and_spectrum_return_display_images():
     assert transform.spectrum_image().dtype == np.uint8
 
 
+def test_high_boost_sharpening_increases_blurred_edge_contrast():
+    source = np.zeros((32, 32), dtype=float)
+    source[:, 16:] = 255
+    blurred = FourierTransform(source)._raw_filter("gaussian", 3)
+    result = FourierTransform(blurred).high_boost(3, 2)
+
+    source_edge = np.abs(np.diff(source[16])).max()
+    blurred_edge = np.abs(np.diff(blurred[16])).max()
+    sharpened_edge = np.abs(np.diff(result[16].astype(float))).max()
+
+    assert blurred_edge < source_edge
+    assert sharpened_edge > blurred_edge
+
+
 def test_invalid_inputs_fail_cleanly():
     with pytest.raises(ValueError):
         FourierTransform(np.zeros((2, 2, 3)))
